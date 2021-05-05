@@ -1,0 +1,14 @@
+<html>
+    <body>
+        <h1> Welcome to Login page</h1>
+        <p></p>
+        
+        <form>
+            <p>Enter User ID:</p>
+            <p><input type = "text" name = "UID" value = {{ UID if UID else '' }} ></p>
+            <p>Enter Password:</p>
+            <p><input type = "password" name = "password" value = {{ password if password else '' }}  ></p>
+            <p><input type = "submit" value = "Login" /></p>
+        </form>
+    </body>
+</html>

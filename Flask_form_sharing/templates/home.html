@@ -1,0 +1,14 @@
+<html>
+    <body>
+        <h1> Welcome to trial1</h1>
+        <p></p>
+        <h2> Enter the user info you wanna share: </h2>
+        <form action = {{ url_for('show_link') }} method = "POST">
+            <p>Enter User ID:</p>
+            <p><input type = "text" name = "UID" ></p>
+            <p>Enter Password:</p>
+            <p><input type = "password" name = "password" ></p>
+            <p><input type = "submit" value = "Share" ></p>
+        </form>
+    </body>
+</html>
