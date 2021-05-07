@@ -1,90 +1,70 @@
-/* globals http, cryptography, Base64, RawDeflate */
-
-(function() {
-  'use strict'
-
-  const log = window.log.bind('[ShareText]')
-
-  const BASE_URL = 'https://privatebin.net'
-  const ENCRYPT_OPTIONS = { mode: 'gcm', ks: 256, ts: 128 }
-
-  const shareText = {
-    getLink: function(text, success, error) {
-      log('Request share link')
-
-      const secret = cryptography.randomkey()
-      const encryption = this.encryptText(secret, text || '')
-
-      this.requestLink(this.getRequestData(encryption), response => {
-        log('Success', response)
-        success && success(this.getPasteURL(secret, response.id))
+!(function () {
+  "use strict";
+  const e = window.log.bind("[ShareText]"),
+    t = { mode: "gcm", ks: 256, ts: 128 },
+    n = {
+      getLink: function (t, n, s) {
+        e("Request share link");
+        const r = cryptography.randomkey(),
+          a = this.encryptText(r, t || "");
+        this.requestLink(
+          this.getRequestData(a),
+          (t) => {
+            e("Success", t), n && n(this.getPasteURL(r, t.id));
+          },
+          (t) => {
+            e("Error", t), s && s(t);
+          }
+        );
       },
-      response => {
-        log('Error', response)
-        error && error(response)
-      })
-    },
-
-    requestLink(data, success, error) {
-      // {status: 1, message: "Please wait 10 seconds between each post."}
-      return postJSON(BASE_URL, data, response => {
-        response = JSON.parse(response)
-
-        if (response.status === 0) {
-          success(response)
-        } else if (response.message === 'Please wait 10 seconds between each post.') {
-          setTimeout(() => this.requestLink(data, success, error), 10000)
-        } else {
-          error(response)
-        }
+      requestLink(e, t, n) {
+        return (function (e, t, n, s) {
+          return (function (e, t, n, s, r) {
+            http({
+              headers: {
+                "Content-Type":
+                  "application/x-www-form-urlencoded; charset=UTF-8",
+                "Accept-Language": "en-US",
+                "X-Requested-With": "JSONHttpRequest",
+              },
+              url: e,
+              method: n,
+              data: t,
+              success: s,
+              error: r,
+            });
+          })(e, t, "POST", n, s);
+        })(
+          "https://privatebin.net",
+          e,
+          (s) => {
+            0 === (s = JSON.parse(s)).status
+              ? t(s)
+              : "Please wait 10 seconds between each post." === s.message
+              ? setTimeout(() => this.requestLink(e, t, n), 1e4)
+              : n(s);
+          },
+          (e) => n(e)
+        );
       },
-      response => error(response))
-    },
-
-    getRequestData: function(text) {
-      return [
-        `data=${encodeURIComponent(text)}`,
-        'expire=10min',
-        'formatter=plaintext',
-        'burnafterreading=1',
-        'opendiscussion=0'
-      ].join('&')
-    },
-
-    getPasteURL: function(secret, id) {
-      // https://privatebin.net/?SOME_ID#SOME_SECRET_KEY
-      return `${BASE_URL}/?${id}#${secret}`
-    },
-
-    encryptText: function(secret, text) {
-      return cryptography.encrypt(secret, this.compress(text), ENCRYPT_OPTIONS)
-    },
-
-    compress: function(text) {
-      return Base64.toBase64( RawDeflate.deflate( Base64.utob(text) ) )
-    }
-  }
-
-
-  function postJSON(url, data, success, error) {
-    return sendJSON(url, data, 'POST', success, error)
-  }
-
-  function sendJSON(url, data, method, success, error) {
-    http({
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'Accept-Language': 'en-US',
-        'X-Requested-With': 'JSONHttpRequest'
+      getRequestData: function (e) {
+        return [
+          `data=${encodeURIComponent(e)}`,
+          "expire=10min",
+          "formatter=plaintext",
+          "burnafterreading=1",
+          "opendiscussion=0",
+        ].join("&");
       },
-      url,
-      method,
-      data,
-      success,
-      error
-    })
-  }
-
-
-  window.shareText = shareText
-})()
+      getPasteURL: function (e, t) {
+        return `https://privatebin.net/?${t}#${e}`;
+      },
+      encryptText: function (e, n) {
+        return cryptography.encrypt(e, this.compress(n), t);
+      },
+      compress: function (e) {
+        return Base64.toBase64(RawDeflate.deflate(Base64.utob(e)));
+      },
+    };
+  window.shareText = n;
+})();
