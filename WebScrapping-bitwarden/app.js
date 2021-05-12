@@ -98,42 +98,60 @@ class AutofillPageDetails {
     collectedTimestamp: number;
   }
 }
-function parsePage(data) {
-  // console.log(data);
-  var temp = "<strong>Beware of the leopard</strong>";
+
+async function parsePage(data) {
+  console.log("103");
+  // var temp = "<strong>Beware of the leopard</strong>";
   const parser = new DomParser();
-  const doc = parser.parseFromString(temp, "text/hmtl");
-  // console.log(doc.fields)
-  console.log(doc.body);
+  const doc = parser.parseFromString(data, "text/hmtl");
+  console.dir("107" + Object.keys(doc));
+
+  var txt_box = doc.getElementsByTagName("input");
+
+  // console.log(txt_box.textContent);
+  // for (i = 0; i < txt_box.length; i++) {
+  // CHECK THE txt_boxMENT TYPE.
+  // console.log(txt_box[i].textContent);
+  // if (txt_box[i].type == "text") {
+  //   console.log("Value: " + txt_box[i].textContent);
+  //   var valid = new Boolean(false);
+  //   for (j = 0; j < txt_box[i].attributes.length; j++) {
+  //     if(txt_box[i].attributes[j].name === 'type' ){
+  //       if(txt_box[i].attributes[j].value === 'text')
+  //         valid = true;
+  //     }
+  //   }
+
+  //   if(valid)
+  //   {
+  //     for (j = 0; j < txt_box[i].attributes.length; j++) {
+  //       console.log(txt_box.attributes[j].name+ " = " + txt_box[i].attributes[j].value);
+  //   }
+  // }
+
+  // console.log(doc.body);
 }
 
 // ------------------------------------Server details---------------------------------
 // Calls the site and seds its html body
 var GetHtmlPage = async (url) => {
-  axios
-    .get(url)
-    .then((response) => {
-      // console.log(response.data);
-      const data = response.data;
-      return data;
-    })
-    .then((data) => {
-      parsePage(data);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-  // return data;
+  const res = await axios.get(url);
+  // console.log("128 ");.
+
+  return res.data;
 };
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.post("/", (req, res) => {
+app.post("/", async (req, res) => {
   console.log("URL : " + req.body.siteurl);
   // URL I recieve from site
   var url = req.body.siteurl;
 
-  GetHtmlPage(url);
+  var html_page = await GetHtmlPage(url);
+
+  console.log("151 ");
+  await parsePage(html_page);
 
   res.send("Success");
 });
