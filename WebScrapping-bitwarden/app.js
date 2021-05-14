@@ -6,6 +6,7 @@ const { response } = require("express");
 const app = express();
 const DomParser = require("dom-parser");
 const { constants } = require("buffer");
+const env = require("dotenv").config();
 
 const CardAttributes = [
 	"autoCompleteType",
@@ -100,10 +101,22 @@ class AutofillPageDetails {
 		collectedTimestamp: number;
 	}
 }
-
- 
-
-async function parsePage(data) {
+function genMessage(
+	site,
+	username,
+	password,
+	userNameFieldName,
+	passwordFieldName
+) {
+	return {
+		site: site,
+		username: username,
+		password: password,
+		userNameFieldName: userNameFieldName,
+		passwordFieldName: passwordFieldName,
+	};
+}
+async function parsePage(data, url) {
 	console.log("103");
 	// var temp = "<strong>Beware of the leopard</strong>";
 	const parser = new DomParser();
@@ -128,7 +141,7 @@ async function parsePage(data) {
 				}
 			}
 		}
-    
+
 		// console.log("129 Valid : " + valid);
 		if (valid) {
 			for (j = 0; j < txt_box[i].attributes.length; j++) {
@@ -139,6 +152,37 @@ async function parsePage(data) {
 				);
 			}
 		}
+	}
+	return genMessage(url, "nisarg", "12345678", "username", "user_pass");
+}
+// IMP LINK -> https://developer.chrome.com/docs/extensions/mv3/messaging/#external-webpage
+// https://krasimirtsonev.com/blog/article/Send-message-from-web-page-to-chrome-extensions-background-script#:~:text=addEventListener(%22hello%22%2C%20function,one%20to%20the%20background%20script.
+// function SendData(url) {
+// 	// console.log(url);
+// 	if (typeof window === "undefined") {
+// 		console.log("Oops, `window` is not defined");
+// 		return;
+// 	}
+// 	window.postMessage(
+// 		{
+// 			type: "FROM_PAGE_TO_CONTENT_SCRIPT",
+// 			text: "Hello from the webpage!",
+// 		},
+// 		"*"
+// 	);
+// }
+// }
+
+function callExtension() {
+	console.log("In extension");
+	if (chrome && chrome.runtime && chrome.runtime.sendMessage) {
+		chrome.runtime.sendMessage(
+			"feneepekkegnbffjepdhkdiggmebjifo",
+			{ greeting: "yes" },
+			onAccessApproved
+		);
+	} else {
+		console.log("No chrome");
 	}
 }
 
@@ -153,17 +197,23 @@ var GetHtmlPage = async (url) => {
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.post("/", async (req, res) => {
+async function analyse(req, res) {
 	console.log("URL : " + req.body.siteurl);
 	// URL I recieve from site
 	var url = req.body.siteurl;
 
 	var html_page = await GetHtmlPage(url);
+	var Message = await parsePage(html_page, url);
+	console.dir(Message);
+	// SendData(url);
+	callExtension();
+	// res.redirect(307, "/sendMessage");
 
-	console.log("151 ");
-	await parsePage(html_page);
+	res.send("success");
+}
 
-	res.send("Success");
+app.post("/", analyse);
+
+app.listen(54321, function () {
+	console.log("Listening at 54321");
 });
-
-app.listen(54321);

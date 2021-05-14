@@ -1,0 +1,17 @@
+{
+	"manifest_version": 2,
+
+	"name": "Extension To Autofill Form and Recieve what to fill",
+	"description": "This extension fills up the form automatically by fetching its value from the database",
+	"version": "1.0",
+    "content_script" :[{
+        "js":["content.js"]
+    }],
+	"browser_action": {
+		"default_icon": "./Assets/icon.png",
+		"default_popup": "popup.html",
+		"default_title": "Click here!"
+	},
+
+	"permissions": ["activeTab", "http://*/*", "https://*/*"]
+}
